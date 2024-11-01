@@ -1,0 +1,164 @@
+Настройка сетевой трансляции адрессов
+Обьявление nat на интерфейсках
+interface GigabitEthernet0/0
+ ip address 205.205.205.2 255.255.255.252
+ ip nat outside
+ duplex auto
+ speed auto
+!
+interface GigabitEthernet0/1
+ ip address 192.168.3.1 255.255.255.252
+ ip nat inside
+ duplex auto
+ speed auto
+!
+interface GigabitEthernet0/2
+ ip address 192.168.3.5 255.255.255.252
+ ip nat inside
+ duplex auto
+ speed auto
+
+2. Создание стандартного ACL (список контроля доступа)
+ip access-list standard FOR_NAT
+ permit 192.168.1.0 0.0.0.127
+ permit 192.168.1.128 0.0.0.31
+ permit 192.168.2.0 0.0.0.63
+ permit 192.168.2.64 0.0.0.15
+3.Привязка ACL к внешнему интерфейсу и включение сетевой трансляции
+ip nat inside source list FOR_NAT interface GigabitEthernet0/0 overload
+
+4.Настройка маршрута по умолчанию 
+ip route 0.0.0.0 0.0.0.0 205.205.205.1
+
+5.для ospf можно настроить рассылку маршрута по умолчанию
+router ospf 1
+ 			System.out.println(" 2. switch");logtadjacency-changes
+ network 192.168.3.0 0.0.0.3 area 0
+ network 192.168.3.4 0.0.0.3 area 0
+ default-information originate
+
+Индивидуальное задание
+Router#show run
+Building configuration...
+
+Current configuration : 1753 bytes
+!
+version 15.1
+no service timestamps log datetime msec
+no service timestamps debug datetime msec
+no service password-encryption
+!
+hostname Router
+!
+!
+!
+!
+!
+ip dhcp pool vlan4
+ network 192.168.2.0 255.255.255.192
+ default-router 192.168.2.62
+ip dhcp pool vlan5
+ network 192.168.2.64 255.255.255.240
+ default-router 192.168.2.78
+ip dhcp pool vlan24
+ network 192.168.24.0 255.255.255.0
+ default-router 192.168.24.254
+ dns-server 0.0.0.0
+ip dhcp pool vlan25
+ network 192.168.25.0 255.255.255.0
+ default-router 192.168.25.254
+ dns-server 0.0.0.0
+!
+!
+!
+ip cef
+no ipv6 cef
+!
+!
+!
+!
+license udi pid CISCO2911/K9 sn FTX15244HD2-
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+spanning-tree mode pvst
+!
+!
+!
+!
+!
+!
+interface Loopback0
+ ip address 192.168.100.2 255.255.255.255
+!
+interface GigabitEthernet0/0
+ no ip address
+ duplex auto
+ speed auto
+!
+interface GigabitEthernet0/0.24
+ encapsulation dot1Q 24
+ ip address 192.168.24.254 255.255.255.0
+!
+interface GigabitEthernet0/0.25
+ encapsulation dot1Q 25
+ ip address 192.168.25.254 255.255.255.0
+!
+interface GigabitEthernet0/1
+ no ip address
+ duplex auto
+ speed auto
+!
+interface GigabitEthernet0/1.4
+ encapsulation dot1Q 4
+ ip address 192.168.2.62 255.255.255.192
+!
+interface GigabitEthernet0/1.5
+ encapsulation dot1Q 5
+ ip address 192.168.2.78 255.255.255.240
+!
+interface GigabitEthernet0/2
+ ip address 192.168.3.6 255.255.255.252
+ duplex auto
+ speed auto
+!
+interface Vlan1
+ no ip address
+ shutdown
+!
+router ospf 1
+ log-adjacency-changes
+ network 192.168.2.0 0.0.0.63 area 0
+ network 192.168.2.64 0.0.0.15 area 0
+ network 192.168.3.4 0.0.0.3 area 0
+ network 192.168.24.0 0.0.0.255 area 0
+ network 192.168.25.0 0.0.0.255 area 0
+!
+ip classless
+!
+ip flow-export version 9
+!
+!
+!
+!
+!
+!
+!
+line con 0
+!
+line aux 0
+!
+line vty 0 4
+ login
+!
+!
+!
+end
